@@ -2,7 +2,7 @@ public class ListPQDriver {
 
     public static void main(String[] args) {
 
-        System.out.println("--- UnsortedListPQ ---");
+        System.out.println("UnsortedListPQ");
 
         PriorityQueue<Integer, String> pq1 =
                 new UnsortedListPQ<>();
