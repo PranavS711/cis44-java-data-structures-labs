@@ -39,12 +39,12 @@ interface MapADT<K, V> {
 class SeparateChainingMap<K, V> implements MapADT<K, V> {
     private ArrayList<LinkedList<Entry<K, V>>> table;
     private int size = 0;
-    private final int N = 11; // prime number for table size
+    private final int N = 11; // Small prime number for table size
 
     public SeparateChainingMap() {
         table = new ArrayList<>(N);
 
-        // Create empty buckets
+        // Create empty linked lists for each bucket
         for (int i = 0; i < N; i++) {
             table.add(new LinkedList<Entry<K, V>>());
         }
@@ -53,6 +53,11 @@ class SeparateChainingMap<K, V> implements MapADT<K, V> {
     // Hash function
     private int hash(K key) {
         return Math.abs(key.hashCode() % N);
+    }
+
+    // This is just for testing, so we can see what bucket a key goes into
+    public int getBucketIndex(K key) {
+        return hash(key);
     }
 
     public int size() {
@@ -65,20 +70,20 @@ class SeparateChainingMap<K, V> implements MapADT<K, V> {
 
     // Get value by key
     public V get(K key) {
-        // 1. Calculate the bucket index
+        // Find the bucket index
         int h = hash(key);
 
-        // 2. Get the bucket at that index
+        // Get the linked list at that bucket
         LinkedList<Entry<K, V>> bucket = table.get(h);
 
-        // 3. Search the bucket for the key
+        // Search through the bucket
         for (Entry<K, V> entry : bucket) {
             if (entry.getKey().equals(key)) {
                 return entry.getValue();
             }
         }
 
-        // 4. Key was not found
+        // Key was not found
         return null;
     }
 
@@ -87,14 +92,14 @@ class SeparateChainingMap<K, V> implements MapADT<K, V> {
         int h = hash(key);
         LinkedList<Entry<K, V>> bucket = table.get(h);
 
-        // Check if key already exists
+        // Check if the key already exists
         for (Entry<K, V> entry : bucket) {
             if (entry.getKey().equals(key)) {
                 return entry.setValue(value);
             }
         }
 
-        // Key is new, so add it
+        // Key is new, so add it to the bucket
         bucket.addFirst(new Entry<>(key, value));
         size++;
         return null;
@@ -107,6 +112,7 @@ class SeparateChainingMap<K, V> implements MapADT<K, V> {
 
         Entry<K, V> toRemove = null;
 
+        // Find the entry to remove
         for (Entry<K, V> entry : bucket) {
             if (entry.getKey().equals(key)) {
                 toRemove = entry;
@@ -114,6 +120,7 @@ class SeparateChainingMap<K, V> implements MapADT<K, V> {
             }
         }
 
+        // Remove it if it was found
         if (toRemove != null) {
             V oldValue = toRemove.getValue();
             bucket.remove(toRemove);
@@ -125,18 +132,43 @@ class SeparateChainingMap<K, V> implements MapADT<K, V> {
     }
 }
 
-// Driver class to test the hash map
-public class Main {
+// Main class to test the SeparateChainingMap
+public class Main_2 {
     public static void main(String[] args) {
-        SeparateChainingMap<Integer, String> map = new SeparateChainingMap<>();
+        SeparateChainingMap<String, String> map = new SeparateChainingMap<>();
 
-        System.out.println("put(5, A): " + map.put(5, "A"));
-        System.out.println("put(7, B): " + map.put(7, "B"));
-        System.out.println("put(2, C): " + map.put(2, "C"));
-        System.out.println("put(2, E): " + map.put(2, "E"));
-        System.out.println("get(7): " + map.get(7));
-        System.out.println("remove(5): " + map.remove(5));
+        System.out.println("Testing SeparateChainingMap with String keys");
+        System.out.println("------------------------------------------");
 
+        // These String keys are expected to hash to the same bucket
+        System.out.println("Bucket for Aa: " + map.getBucketIndex("Aa"));
+        System.out.println("Bucket for BB: " + map.getBucketIndex("BB"));
+        System.out.println("Bucket for AaAa: " + map.getBucketIndex("AaAa"));
+        System.out.println();
+
+        // Insert values
+        System.out.println("put(Aa, Apple): " + map.put("Aa", "Apple"));
+        System.out.println("put(BB, Banana): " + map.put("BB", "Banana"));
+        System.out.println("put(AaAa, Cherry): " + map.put("AaAa", "Cherry"));
+        System.out.println();
+
+        // Get values to prove collision handling works
+        System.out.println("get(Aa): " + map.get("Aa"));
+        System.out.println("get(BB): " + map.get("BB"));
+        System.out.println("get(AaAa): " + map.get("AaAa"));
+        System.out.println();
+
+        // Replace an existing value
+        System.out.println("put(BB, Blueberry): " + map.put("BB", "Blueberry"));
+        System.out.println("get(BB): " + map.get("BB"));
+        System.out.println();
+
+        // Remove a value
+        System.out.println("remove(Aa): " + map.remove("Aa"));
+        System.out.println("get(Aa): " + map.get("Aa"));
+        System.out.println();
+
+        // Final map info
         System.out.println("size(): " + map.size());
         System.out.println("isEmpty(): " + map.isEmpty());
     }
